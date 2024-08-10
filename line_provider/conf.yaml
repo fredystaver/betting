@@ -1,0 +1,19 @@
+line_provider:
+  title: "Line Provider"
+  host: 0.0.0.0
+  port: 8080
+
+postgres:
+  db_host: line_provider_db
+  db_port: 5432
+  db_name: line_provider_db
+  max_overflow: 2
+  pool_size: 2
+  db_user: postgres
+  db_password: postgres
+
+rabbit:
+  rabbit_host: rabbitmq
+  rabbit_vhost: /
+  rabbit_user: admin
+  rabbit_pass: admin
