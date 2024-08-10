@@ -13,9 +13,9 @@ class EventsResponseSchema(BaseModel):
 
 
 class EventStatusesEnum(IntEnum):
-    PROCESSING = auto()
-    WIN_FIRST = auto()
-    WIN_SECOND = auto()
+    NEW = auto()
+    FINISHED_WIN = auto()
+    FINISHED_LOSE = auto()
 
 
 class EventMessage(BaseModel):

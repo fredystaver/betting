@@ -17,3 +17,4 @@ rabbit:
   rabbit_vhost: /
   rabbit_user: admin
   rabbit_pass: admin
+  queue_name: new_status

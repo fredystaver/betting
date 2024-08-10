@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from bet_maker.dao.bets import BetsDAO
 from bet_maker.exceptions import EventIsClosed
 from bet_maker.models.bets import Bets
+from bet_maker.schemas import CreateBetRequest
 from bet_maker.services.events import EventsService
 from core.controller import BaseController
 

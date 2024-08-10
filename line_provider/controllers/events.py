@@ -2,10 +2,14 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Sequence
 
+import aio_pika
+from aio_pika import Channel
+
 from core.controller import BaseController
 from line_provider.dao.dao import EventsDAO
 from line_provider.exceptions import EventIsNotExists
-from line_provider.models.events import Events, EventStatuses
+from line_provider.models.events import Events
+from line_provider.schemas import EventChangeStatusMessage
 
 
 class EventsController(BaseController):
@@ -31,10 +35,13 @@ class EventsController(BaseController):
     async def change_event(
         self,
         event_id: int,
-        status: str | None,
+        status: int | None,
         dead_line_at: datetime | None,
-        coefficient: Decimal | None
+        coefficient: Decimal | None,
+        rabbit_channel: Channel
     ) -> Events:
+        message = None
+
         event = await self.get_by_id(event_id=event_id)
         async with self._unit_of_work:
             if coefficient:
@@ -42,5 +49,18 @@ class EventsController(BaseController):
             if dead_line_at:
                 event.dead_line_at = dead_line_at
             if status:
-                event.status = EventStatuses.status
+                if event.status_id != status:
+                    message = EventChangeStatusMessage(event_id=event.id, status_id=status)
+                    event.status_id = status
+        if message:
+            await self._send_change_msg(rabbit_channel=rabbit_channel, message=message)
         return event
+
+    async def _send_change_msg(self, rabbit_channel: Channel, message: EventChangeStatusMessage | None) -> None:
+        await rabbit_channel.default_exchange.publish(
+            aio_pika.Message(
+                body=message.json().encode(),
+                delivery_mode=aio_pika.DeliveryMode.PERSISTENT,
+            ),
+            routing_key=self._settings.rabbit.queue_name,
+        )

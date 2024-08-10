@@ -31,6 +31,7 @@ class RabbitSettings(BaseSettings):
     rabbit_vhost: str
     rabbit_user: str
     rabbit_pass: str
+    queue_name: str
 
     @property
     def rabbit_url(self) -> str:

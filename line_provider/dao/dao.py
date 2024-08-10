@@ -12,7 +12,6 @@ class EventsDAO(BaseDAO):
     async def get_all(self, dead_line_at: datetime) -> Sequence[Events]:
         query = select(Events)
         if dead_line_at:
-            print(dead_line_at)
             query = query.where(Events.dead_line_at > dead_line_at)
         result = await self._db_session.execute(query)
         return result.scalars().all()

@@ -1,9 +1,11 @@
 from typing import Sequence
 
+from aio_pika import Channel
 from fastapi import APIRouter, Depends, Path, status
 
 from core.dependencies import get_controller
 from core.schemas import EventsResponseSchema
+from core.utils import get_rabbit_channel
 from line_provider.controllers.events import EventsController
 from line_provider.schemas import EventCreateRequest, EventChangeRequest
 
@@ -43,11 +45,13 @@ async def create_event(
 async def change_event(
     body: EventChangeRequest,
     event_id: int = Path(),
-    controller: EventsController = Depends(get_controller(EventsController))
+    controller: EventsController = Depends(get_controller(EventsController)),
+    rabbit_channel: Channel = Depends(get_rabbit_channel)
 ) -> EventsResponseSchema:
     return await controller.change_event(
         event_id=event_id,
         status=body.status_id,
         coefficient=body.coefficient,
-        dead_line_at=body.dead_line_at
+        dead_line_at=body.dead_line_at,
+        rabbit_channel=rabbit_channel
     )
