@@ -2,10 +2,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from uvicorn import run
 
-from core.utils import create_engine, setup_rabbit_connection, close_rabbit_connection, init_tables, insert_data
+from core.utils import create_engine, init_tables, insert_data
 from line_provider.models.events import Base, EventStatuses
 from line_provider.routers.events import router as events_router
 from line_provider.settings import get_settings, Settings
+from line_provider.utils import setup_rabbit_connection, close_rabbit_connection
 
 
 def main() -> None:

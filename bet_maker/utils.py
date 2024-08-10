@@ -1,6 +1,8 @@
 import json
+import logging
 from typing import Callable, Awaitable
 
+import aio_pika
 from aio_pika.abc import AbstractIncomingMessage
 from fastapi import FastAPI
 from pydantic import ValidationError
@@ -31,3 +33,27 @@ def _get_callback(app: FastAPI) -> Callable[[AbstractIncomingMessage], Awaitable
                             raise ValidationError
 
     return callback
+
+
+def setup_rabbit_connection(app: FastAPI) -> Callable[[], Awaitable[None]]:
+    settings = app.state._settings.rabbit
+
+    async def rabbit_connection() -> None:
+        connection = await aio_pika.connect_robust(url=settings.rabbit_url)
+        logging.debug(msg=f"Установлено подключение к RabbitMQ: {settings.rabbit_url}")
+        channel = await connection.channel()
+        queue = await channel.declare_queue(settings.queue_name, auto_delete=True)
+
+        app.state.rabbit_channel = channel
+        app.state.rabbit_connection = connection
+
+        await queue.consume(_get_callback(app))
+
+    return rabbit_connection
+
+
+def close_rabbit_connection(app: FastAPI) -> Callable[[], Awaitable[None]]:
+    async def event() -> None:
+        await app.state.rabbit_connection.close()
+
+    return event

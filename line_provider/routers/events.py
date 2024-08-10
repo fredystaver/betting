@@ -5,9 +5,9 @@ from fastapi import APIRouter, Depends, Path, status
 
 from core.dependencies import get_controller
 from core.schemas import EventsResponseSchema
-from core.utils import get_rabbit_channel
 from line_provider.controllers.events import EventsController
 from line_provider.schemas import EventCreateRequest, EventChangeRequest
+from line_provider.utils import get_rabbit_channel
 
 router = APIRouter(
     prefix="/events",
